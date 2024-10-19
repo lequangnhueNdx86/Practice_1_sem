@@ -1,0 +1,54 @@
+import pandas as pd
+import re
+import matplotlib.pyplot as plt
+from collections import Counter
+
+
+def read_text(file_path):
+    """Читает текст из файла с кодировкой utf-8."""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return file.read()
+
+
+def get_4_grams(text):
+    """Извлекает все 4-грами из текста, включая пробелы."""
+    return [text[i:i + 4] for i in range(len(text) - 3)]
+
+
+def compute_statistics(grams):
+    """Вычисляет частоты и вероятности 4-грам."""
+    total = len(grams)
+    counter = Counter(grams)
+    # Создаем DataFrame
+    df = pd.DataFrame(counter.items(), columns=['4-грамма', 'Частота'])
+    df['Вероятность'] = df['Частота'] / total
+    # Сортируем по алфавиту
+    df = df.sort_values(by='4-грамма').reset_index(drop=True)
+    return df, total
+def main():
+    # Шаг 1: Чтение текста
+    text = read_text('test.txt')
+    text = text.lower() # чтобы считать, например, "Абсо" и "абсо" как одну 4-грамму.
+    text = re.sub('[^а-яА-ЯёЁ ]', '', text) #Если необходимо учитывать только буквы и пробелы, можно отфильтровать остальные символы.
+    # Шаг 2: Извлечение 4-грамм
+    grams = get_4_grams(text)
+
+    # Шаг 3: Вычисление статистик
+    df, total = compute_statistics(grams)
+
+    # Шаг 4: Вывод табличной статистики
+    pd.set_option('display.max_rows', None)  # Показать все строки
+    print("Табличная статистика 4-грамм:")
+    print(df)
+
+    # Шаг 6: Вычисление и вывод суммы вероятностей
+    total_prob = df['Вероятность'].sum()
+    print(f"\nСумма вероятностей: {total_prob}")
+    if abs(total_prob - 1.0) < 1e-6:
+        print("Сумма вероятностей равна 1.")
+    else:
+        print("Сумма вероятностей НЕ равна 1.")
+
+
+if __name__ == "__main__":
+    main()

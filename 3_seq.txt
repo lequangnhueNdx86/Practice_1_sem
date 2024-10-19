@@ -1,0 +1,47 @@
+import re
+
+def analyze_trigrams(filename):
+  """
+  Анализирует текст в файле и вычисляет статистические характеристики для триграммов,
+  включая триграммы с пробелами.
+
+  Args:
+    filename: Имя файла с текстом.
+
+  Returns:
+    Словарь, где ключ - триграмм, а значение - количество его вхождений.
+  """
+
+  with open(filename, encoding='utf-8') as file:
+    text = file.read()
+
+  trigrams = re.findall(r'([а-я ]{1})([а-я ]{1})([а-я ]{1})', text.lower())
+  trigram_counts = {}
+  for trigram in trigrams:
+    trigram_str = ''.join(trigram)  # Объединяем три символа в строку
+    if trigram_str in trigram_counts:
+      trigram_counts[trigram_str] += 1
+    else:
+      trigram_counts[trigram_str] = 1
+
+  sorted_trigrams = sorted(trigram_counts.items())
+  return sorted_trigrams
+
+if __name__ == '__main__':
+  filename = 'test.txt'
+  sorted_trigrams = analyze_trigrams(filename)
+
+  print("Статистика триграммов (отсортировано по алфавиту):")
+  total_trigrams = sum(count for _, count in sorted_trigrams)
+
+  # Табличная статистика с нумерацией
+  print("-----------------------------------------")
+  print("№ | Триграмм | Количество | Вероятность")
+  print("-----------------------------------------")
+  for i, (trigram, count) in enumerate(sorted_trigrams, 1):  # enumerate для нумерации
+    probability = count / total_trigrams
+    print(f"{i} | {trigram} | {count} | {probability:.4f}")
+
+  # Проверка суммы вероятностей
+  total_probability = sum(count / total_trigrams for _, count in sorted_trigrams)
+  print(f"\nСумма вероятностей: {total_probability:.4f}")
